@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
-const upvoteSchema = new mongoose.Schema({
+const commmentSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    required: true,
+  },
   blog:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Blog',
@@ -16,6 +20,6 @@ const upvoteSchema = new mongoose.Schema({
 })
 
 
-const Upvote = mongoose.model('Upvote', upvoteSchema);
+const Comment = mongoose.model('Comment', commmentSchema);
 
-module.exports = Upvote;
+module.exports = Comment;
