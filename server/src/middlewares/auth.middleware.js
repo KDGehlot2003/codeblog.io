@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
 const ApiError = require('../utils/ApiError.js');
-const asyncHandler = require('../utils/ApiError.js');
+const asyncHandler = require('../utils/asyncHandler.js');
 const User = require('../models/user.model.js');
 
 
-const verifyJWT = new asyncHandler(async (req, _, next) => {     // added new keyword
+const verifyJWT = asyncHandler(async (req, _, next) => {     // added new keyword
   try {
     const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
 
