@@ -22,7 +22,6 @@ const generateAccessAndRefreshTokens = async(userId) => {
     }
 }
 
-
 const registerUser = asyncHandler( async (req,res) => {
 
     const {fullName, email, username, password} = req.body
@@ -130,7 +129,30 @@ const loginUser = asyncHandler(async (req,res) => {
 })
 
 const logoutUser = asyncHandler(async (req,res) => {
-    // TODO: logout the user
+    // console.log(req.user);
+    
+    await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $unset:{
+                refreshToken: 1, //this will remove the refreshToken field from the document
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
 
