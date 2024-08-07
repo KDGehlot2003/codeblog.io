@@ -27,7 +27,56 @@ const registerUser = asyncHandler( async (req,res) => {
 
     const {fullName, email, username, password} = req.body
 
-    // TODO: validate the request body
+
+    if (
+        [fullName, email, username, password].some((item) => item?.trim() ==="" )
+    ) {
+        throw new ApiError(400, "All fields required")
+    }
+
+    const existedUser = await User.findOne({
+        $or: [{ username },{ email }]
+    })
+
+    if (existedUser) {
+        throw new ApiError(409, "User with email or username already exists")
+    }
+
+    // console.log(req.files);
+    
+
+    const profileImageLocalPath = req.files?.profileImage[0]?.path
+
+    if (!profileImageLocalPath) {
+        throw new ApiError(400, "Profile Image file is required")
+    }
+
+    const profileImage = await uploadOnCloudinary(profileImageLocalPath)
+
+    if(!profileImage){
+        throw new ApiError(400, "Profile Image file is required 2")
+    }
+
+    const user = await User.create({
+        fullName,
+        profileImage: profileImage.url,
+        email,
+        password,
+        username: username.toLowerCase()
+    })
+
+    const createdUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+    )
+
+    if (!createdUser) {
+        throw new ApiError(500, "Something went wrong while registering the user")
+    }
+
+    return res.status(201).json(
+        new ApiResponse(200, createdUser, "User register Successfully...")
+    )
+
 })
 
 const loginUser = asyncHandler(async (req,res) => {
