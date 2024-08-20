@@ -26,11 +26,13 @@ app.use(cookieParser())
 
 // routes import 
 const userRouter = require('./routes/user.routes.js');
+const blogRouter = require('./routes/blog.routes.js');
 
 
 
 //routes declaration
 app.use("/api/v1/users", userRouter)
+app.use("/api/v1/blogs", blogRouter)
 
 
 

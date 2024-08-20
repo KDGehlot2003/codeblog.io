@@ -3,7 +3,8 @@ const Router = require('express');
 const { 
     registerUser,
     loginUser,
-    logoutUser 
+    logoutUser,
+    getUserProfile
 } = require('../controllers/user.controller.js');
 
 const {upload} = require('../middlewares/multer.middleware.js');
@@ -24,6 +25,8 @@ router.route("/login").post(loginUser)
 
 
 router.route("/logout").post(verifyJWT, logoutUser)
+router.route("/c/:username").get(verifyJWT, getUserProfile)
+
 
 
 
