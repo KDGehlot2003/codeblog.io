@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
   },
   profileImage:{
     type: String, // Cloudinary URL
-    required: true,
+    // required: true,
   },
   password:{
     type: String,

@@ -44,21 +44,21 @@ const registerUser = asyncHandler( async (req,res) => {
     // console.log(req.files);
     
 
-    const profileImageLocalPath = req.files?.profileImage[0]?.path
+    // const profileImageLocalPath = req.files?.profileImage[0]?.path
 
-    if (!profileImageLocalPath) {
-        throw new ApiError(400, "Profile Image file is required")
-    }
+    // if (!profileImageLocalPath) {
+    //     throw new ApiError(400, "Profile Image file is required")
+    // }
 
-    const profileImage = await uploadOnCloudinary(profileImageLocalPath)
+    // const profileImage = await uploadOnCloudinary(profileImageLocalPath)
 
-    if(!profileImage){
-        throw new ApiError(400, "Profile Image file is required 2")
-    }
+    // if(!profileImage){
+    //     throw new ApiError(400, "Profile Image file is required 2")
+    // }
 
     const user = await User.create({
         fullName,
-        profileImage: profileImage.url,
+        // profileImage: profileImage.url,
         email,
         password,
         username: username.toLowerCase()
