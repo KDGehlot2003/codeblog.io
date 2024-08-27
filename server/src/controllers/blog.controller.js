@@ -34,17 +34,32 @@ const createBlog = asyncHandler( async (req,res) => {
         .json(new ApiResponse(201, blog,"Blog created successfully"))
 })
 
-const getAllBlogs = asyncHandler( async (req,res) => {
-    const blogs = await Blog.find().populate('owner', req.user._id); // Adjust fields as needed
+const getAllBlogs = asyncHandler(async (req, res) => {
+    const sortBy = req.query.sortBy || 'createdAt'; // Default to sorting by 'createdAt'
+    const order = req.query.order === 'desc' ? -1 : 1; // Default to ascending order
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 blogs per page
+    const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+    const blogs = await Blog.find()
+        .populate('owner', req.user._id)
+        .sort({ [sortBy]: order })
+        .skip(skip)
+        .limit(limit);
+
+    const totalBlogs = await Blog.countDocuments(); // Get the total number of blogs
 
     if (!blogs.length) {
         throw new ApiError(404, "No blogs found");
     }
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, blogs, "Blogs fetched successfully"));
-})
+    return res.status(200).json(new ApiResponse(200, {
+        blogs,
+        currentPage: page,
+        totalPages: Math.ceil(totalBlogs / limit),
+        totalBlogs
+    }, "Blogs fetched successfully"));
+});
 
 const getBlogById = asyncHandler( async (req,res) => {
     // 66b391a4fc91a2beb66da84d sample blog id
