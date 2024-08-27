@@ -8,8 +8,10 @@ const jwt = require('jsonwebtoken');
 
 const generateAccessAndRefreshTokens = async(userId) => {
     try {
+        
         const user = await User.findById(userId)
         const accessToken = user.generateAccessToken()
+
         const refreshToken = user.generateRefreshToken()
 
         user.refreshToken = refreshToken
@@ -18,7 +20,7 @@ const generateAccessAndRefreshTokens = async(userId) => {
         return {accessToken,refreshToken}
 
     } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating refresh and access token")
+        throw new ApiError(501, "Something went wrong while generating refresh and access token")
     }
 }
 
@@ -39,6 +41,10 @@ const registerUser = asyncHandler( async (req,res) => {
 
     if (existedUser) {
         throw new ApiError(409, "User with email or username already exists")
+    }
+
+    if (password.length < 6) {
+        throw new ApiError(400, "Password should be at least 6 characters long")
     }
 
     // console.log(req.files);
@@ -84,6 +90,7 @@ const loginUser = asyncHandler(async (req,res) => {
     // password should match
 
     const {email, username, password} = req.body
+    
 
     if (!(username || email)) {
         throw new ApiError(400,"usernamw or email is required")
@@ -93,19 +100,34 @@ const loginUser = asyncHandler(async (req,res) => {
         $or: [{username}, {email}]
     })
 
+    console.log(user);
+    
+
     if (!user) {
         throw new ApiError(404, "User does not exist")
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password)
 
+    console.log(isPasswordValid);
+    
+
     if (!isPasswordValid) {
         throw new ApiError(401, "Invalid user credentials")
     }
 
+    console.log(123);
+    
     const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id)
+    console.log(11111111);
+    
+    // console.log(accessToken,refreshToken);
+    
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+
+    console.log(loggedInUser);
+    
 
     const options = {
         httpOnly: true,
@@ -122,7 +144,7 @@ const loginUser = asyncHandler(async (req,res) => {
             {
                 user: loggedInUser, accessToken, refreshToken
             },
-            "user logged In Successfully..."
+            "User logged In Successfully..."
         )
     )
 
