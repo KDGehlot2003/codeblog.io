@@ -41,11 +41,13 @@ const registerUser = asyncHandler( async (req,res) => {
     })
 
     if (existedUser) {
-        throw new ApiError(409, "User with email or username already exists")
+        res.status(409).json(new ApiResponse(409, {}, "User with email or username already exists"))
+        // throw new ApiError(409, "User with email or username already exists")
     }
 
     if (password.length < 6) {
-        throw new ApiError(400, "Password should be at least 6 characters long")
+        res.status(400).json(new ApiResponse(400, {}, "Password should be at least 6 characters long"))
+        // throw new ApiError(400, "Password should be at least 6 characters long")
     }
 
     // console.log(req.files);
@@ -76,7 +78,8 @@ const registerUser = asyncHandler( async (req,res) => {
     )
 
     if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering the user")
+        res.status(500).json(new ApiResponse(500, {}, "Something went wrong while registering the user"))
+        // throw new ApiError(500, "Something went wrong while registering the user")
     }
 
     return res.status(201).json(
@@ -94,7 +97,8 @@ const loginUser = asyncHandler(async (req,res) => {
     
 
     if (!(username || email)) {
-        throw new ApiError(400,"usernamw or email is required")
+        res.status(400).json(new ApiResponse(400, {}, "usernamw or email is required"))
+        // throw new ApiError(400,"usernamw or email is required")
     }
 
     const user = await User.findOne({
@@ -105,7 +109,8 @@ const loginUser = asyncHandler(async (req,res) => {
     
 
     if (!user) {
-        throw new ApiError(404, "User does not exist")
+        res.status(404).json(new ApiResponse(404, {}, "User does not exist"))
+        // throw new ApiError(404, "User does not exist")
     }
 
     const isPasswordValid = await user.isPasswordCorrect(password)
@@ -114,7 +119,8 @@ const loginUser = asyncHandler(async (req,res) => {
     
 
     if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid user credentials")
+        res.status(401).json(new ApiResponse(401, {}, "Invalid user credentials"))
+        // throw new ApiError(401, "Invalid user credentials")
     }
 
     console.log(123);
