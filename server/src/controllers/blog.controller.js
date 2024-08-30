@@ -14,18 +14,17 @@ const createBlog = asyncHandler( async (req,res) => {
             throw new ApiError(400, "Please provide title and content")
         }
 
-        const thumbnailLocalPath = req.files?.thumbnail[0]?.path
+        // const thumbnailLocalPath = req.files?.thumbnail[0]?.path
         
-        if(!thumbnailLocalPath){
-            throw new ApiError(400, "Please provide thumbnail")
-        }
+        // if(!thumbnailLocalPath){
+        //     throw new ApiError(400, "Please provide thumbnail")
+        // }
 
-        const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+        // const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
         
         const blog = await Blog.create({
             title,
             content,
-            thumbnail: thumbnail.url,
             owner: req.user._id
         })
     
