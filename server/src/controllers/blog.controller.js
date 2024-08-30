@@ -11,13 +11,15 @@ const createBlog = asyncHandler( async (req,res) => {
         const {title,content} = req.body
 
         if(!(title && content)){
-            throw new ApiError(400, "Please provide title and content")
+            res.status(400).json(new ApiResponse(400, {}, "Please provide title and content"))
+            // throw new ApiError(400, "Please provide title and content")
         }
 
         const thumbnailLocalPath = req.files?.thumbnail[0]?.path
         
         if(!thumbnailLocalPath){
-            throw new ApiError(400, "Please provide thumbnail")
+            res.status(400).json(new ApiResponse(400, {}, "Please provide thumbnail"))
+            // throw new ApiError(400, "Please provide thumbnail")
         }
 
         const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
@@ -50,7 +52,8 @@ const getAllBlogs = asyncHandler(async (req, res) => {
     const totalBlogs = await Blog.countDocuments(); // Get the total number of blogs
 
     if (!blogs.length) {
-        throw new ApiError(404, "No blogs found");
+        res.status(404).json(new ApiResponse(404, {}, "No blogs found"));
+        // throw new ApiError(404, "No blogs found");
     }
 
     return res.status(200).json(new ApiResponse(200, {
@@ -66,13 +69,15 @@ const getBlogById = asyncHandler( async (req,res) => {
     const {blogId} = req.params
 
     if (!isValidObjectId(blogId)) {
-        throw new ApiError(400, "Invalid blog id")
+        res.status(400).json(new ApiResponse(400, {}, "Invalid blog id"))
+        // throw new ApiError(400, "Invalid blog id")
     }
 
     const blog = await Blog.findById(blogId)
 
     if (!blog) {
-        throw new ApiError(400, "Blog not found")
+        res.status(404).json(new ApiResponse(404, {}, "Blog not found"))
+        // throw new ApiError(400, "Blog not found")
     }
 
     return res
@@ -87,7 +92,8 @@ const updateBlog = asyncHandler( async (req,res) => {
     const { title, content } = req.body;
 
     if (!(title || content || req.files?.thumbnail)) {
-        throw new ApiError(400, "Please provide at least one field to update");
+        res.status(400).json(new ApiResponse(400, {}, "Please provide at least one field to update"));
+        // throw new ApiError(400, "Please provide at least one field to update");
     }
     console.log(blogId);
     
@@ -95,11 +101,13 @@ const updateBlog = asyncHandler( async (req,res) => {
     const blog = await Blog.findById(blogId);
 
     if (!blog) {
-        throw new ApiError(404, "Blog not found");
+        res.status(404).json(new ApiResponse(404, {}, "Blog not found"));
+        // throw new ApiError(404, "Blog not found");
     }
 
     if (blog.owner.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "You are not authorized to update this blog");
+        res.status(403).json(new ApiResponse(403, {}, "You are not authorized to update this blog"));
+        // throw new ApiError(403, "You are not authorized to update this blog");
     }
 
     if (title) blog.title = title;
@@ -125,11 +133,13 @@ const deleteBlog = asyncHandler( async (req,res) => {
     const blog = await Blog.findById(blogId);
 
     if (!blog) {
-        throw new ApiError(404, "Blog not found");
+        res.status(404).json(new ApiResponse(404, {}, "Blog not found"));
+        // throw new ApiError(404, "Blog not found");
     }
 
     if (blog.owner.toString() !== req.user._id.toString()) {
-        throw new ApiError(403, "You are not authorized to delete this blog");
+        res.status(403).json(new ApiResponse(403, {}, "You are not authorized to delete this blog"));
+        // throw new ApiError(403, "You are not authorized to delete this blog");
     }
 
     await Blog.findByIdAndDelete(blogId);
