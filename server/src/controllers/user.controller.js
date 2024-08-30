@@ -45,6 +45,22 @@ const registerUser = asyncHandler( async (req,res) => {
         // throw new ApiError(409, "User with email or username already exists")
     }
 
+    // console.log(email, username);
+    
+
+    if (username.length < 4 || username.length > 20) {
+        res.status(400).json(new ApiResponse(400, {}, "Username should be between 4 and 20 characters long"))
+        // throw new ApiError(400, "Username should be between 4 and 20 characters long")
+    }
+
+    // Edge Case: User Registration with Special Characters in Email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(email)) {
+        res.status(400).json(new ApiResponse(400, {}, "Invalid email address"))
+        // throw new ApiError(400, "Invalid email address")
+    }
+
     if (password.length < 6) {
         res.status(400).json(new ApiResponse(400, {}, "Password should be at least 6 characters long"))
         // throw new ApiError(400, "Password should be at least 6 characters long")
@@ -105,7 +121,7 @@ const loginUser = asyncHandler(async (req,res) => {
         $or: [{username}, {email}]
     })
 
-    console.log(user);
+    // console.log(user);
     
 
     if (!user) {
@@ -115,7 +131,7 @@ const loginUser = asyncHandler(async (req,res) => {
 
     const isPasswordValid = await user.isPasswordCorrect(password)
 
-    console.log(isPasswordValid);
+    // console.log(isPasswordValid);
     
 
     if (!isPasswordValid) {
@@ -123,17 +139,17 @@ const loginUser = asyncHandler(async (req,res) => {
         // throw new ApiError(401, "Invalid user credentials")
     }
 
-    console.log(123);
+    // console.log(123);
     
     const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(user._id)
-    console.log(11111111);
+    // console.log(11111111);
     
     // console.log(accessToken,refreshToken);
     
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
 
-    console.log(loggedInUser);
+    // console.log(loggedInUser);
     
 
     const options = {

@@ -55,8 +55,8 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 }
 
 userSchema.methods.generateAccessToken = function () {
-  console.log(process.env.ACCESS_TOKEN_SECRET); // should not be undefined
-  console.log(process.env.ACCESS_TOKEN_EXPIRY); // should not be undefined
+  // console.log(process.env.ACCESS_TOKEN_SECRET); // should not be undefined
+  // console.log(process.env.ACCESS_TOKEN_EXPIRY); // should not be undefined
   return jwt.sign(
       {
           _id: this._id,
