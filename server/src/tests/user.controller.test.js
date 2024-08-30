@@ -82,17 +82,21 @@ describe('User Registration', () => {
             .send(invalidUser);
         expect(res.status).toBe(400);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'Email is required');
+        expect(res.body).toHaveProperty('message', 'All fields required');
     }, 2000);
 
     test('Negative Test: User Registration with Short Password', async () => {
-        const invalidUser = { ...mockUser1, password: '12345' }; // Password too short
+        const invalidUser = {   fullName: 'Akshay Kumar',
+                                email: 'akkukumar@example.com',
+                                username: 'akku1947',
+                                password: "1234" 
+                            }; // Password too short
         const res = await request(app)
             .post('/api/v1/users/register')
             .send(invalidUser);
         expect(res.status).toBe(400);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'Password must be at least 6 characters long');
+        expect(res.body).toHaveProperty('message', 'Password should be at least 6 characters long');
     }, 2000);
 
     test('Negative Test: User Registration with Duplicate Email', async () => {
@@ -107,7 +111,7 @@ describe('User Registration', () => {
             .send({ ...mockUser1, username: 'newusername' });
         expect(res.status).toBe(409);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'User with this email already exists');
+        expect(res.body).toHaveProperty('message', 'User with email or username already exists');
     }, 2000);
 
     test('Negative Test: User Registration with Duplicate Username', async () => {
@@ -122,27 +126,32 @@ describe('User Registration', () => {
             .send({ ...mockUser1, email: 'newemail@example.com' });
         expect(res.status).toBe(409);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'User with this username already exists');
+        expect(res.body).toHaveProperty('message', 'User with email or username already exists');
     }, 2000);
 
     test('Edge Case: User Registration with Extremely Large Username', async () => {
-        const largeUsername = 'u'.repeat(1000); // Extremely large username
+        const invalidLargeUsername = {
+            fullName: 'Vinay Apte',
+            email: 'vinayapte@example.com',
+            username:'Prabhakarna_Sripalawardhana_Atapattu_Jayasuriya_Laxmansriramkrishna_Shivavenkata_Rajasekara_Sriniwasana_Trichipalli_Yekya_Parampeel_Parambatur_Chinnaswami_Muthuswami_Venugopal_Iyer',
+            password: "dhamaal123"
+        } // Extremely large username
         const res = await request(app)
             .post('/api/v1/users/register')
-            .send({ ...mockUser1, username: largeUsername });
+            .send({ ...invalidLargeUsername });
         expect(res.status).toBe(400);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'Username is too long');
+        expect(res.body).toHaveProperty('message', 'Username should be between 4 and 20 characters long');
     }, 2000);
 
     test('Edge Case: User Registration with Special Characters in Email', async () => {
         const specialCharEmail = 'special!#$%&\'*+/=?^_`{|}~@example.com';
         const res = await request(app)
             .post('/api/v1/users/register')
-            .send({ ...mockUser1, email: specialCharEmail });
+            .send({ ...mockUser1, username: "iamspecial", email: specialCharEmail });
         expect(res.status).toBe(400);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'Invalid email format');
+        expect(res.body).toHaveProperty('message', 'Invalid email address');
     }, 2000);
 });
 
@@ -167,9 +176,9 @@ describe('User Login', () => {
         const res = await request(app)
             .post('/api/v1/users/login')
             .send({ username: 'invalidUser', password: mockUser.password });
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(404);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'Invalid username or password');
+        expect(res.body).toHaveProperty('message', 'User does not exist');
     }, 2000);
 
     test('Edge Case: User Login with Invalid Password', async () => {
@@ -178,7 +187,7 @@ describe('User Login', () => {
             .send({ username: mockUser.username, password: 'wrongPassword' });
         expect(res.status).toBe(401);
         // Uncomment the line below once error messages are implemented in the API
-        // expect(res.body).toHaveProperty('message', 'Invalid username or password');
+        expect(res.body).toHaveProperty('message', 'Invalid user credentials');
     }, 2000);
 });
 
