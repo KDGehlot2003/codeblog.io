@@ -8,20 +8,20 @@ const { isValidObjectId } = require('mongoose');
 
 const createBlog = asyncHandler( async (req,res) => {
         //TODO: create tweet
-        const {title,content} = req.body
+        const {title,content,category} = req.body
 
-        if(!(title && content)){
-            res.status(400).json(new ApiResponse(400, {}, "Please provide title and content"))
+        if(!(title && content && category)){
+            res.status(400).json(new ApiResponse(400, {}, "Please provide title, content and category"))
             // throw new ApiError(400, "Please provide title and content")
         }
 
         // const thumbnailLocalPath = req.files?.thumbnail[0]?.path
         
 
-        if(!thumbnailLocalPath){
-            res.status(400).json(new ApiResponse(400, {}, "Please provide thumbnail"))
-            // throw new ApiError(400, "Please provide thumbnail")
-        }
+//         if(!thumbnailLocalPath){
+//             res.status(400).json(new ApiResponse(400, {}, "Please provide thumbnail"))
+//             // throw new ApiError(400, "Please provide thumbnail")
+//         }
 
 
         // const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
@@ -29,6 +29,8 @@ const createBlog = asyncHandler( async (req,res) => {
         const blog = await Blog.create({
             title,
             content,
+            category,
+            // thumbnail: thumbnail.url,
             owner: req.user._id
         })
     
@@ -37,6 +39,34 @@ const createBlog = asyncHandler( async (req,res) => {
         .json(new ApiResponse(201, blog,"Blog created successfully"))
 })
 
+// const getAllBlogs = asyncHandler(async (req, res) => {
+//     const sortBy = req.query.sortBy || 'createdAt'; // Default to sorting by 'createdAt'
+//     const order = req.query.order === 'desc' ? -1 : 1; // Default to ascending order
+//     const page = parseInt(req.query.page) || 1; // Default to page 1
+//     const limit = parseInt(req.query.limit) || 10; // Default to 10 blogs per page
+//     const skip = (page - 1) * limit; // Calculate the number of documents to skip
+
+//     const blogs = await Blog.find()
+//         .populate('owner', req.user._id)
+//         .sort({ [sortBy]: order })
+//         .skip(skip)
+//         .limit(limit);
+
+//     const totalBlogs = await Blog.countDocuments(); // Get the total number of blogs
+
+//     if (!blogs.length) {
+//         res.status(404).json(new ApiResponse(404, {}, "No blogs found"));
+//         // throw new ApiError(404, "No blogs found");
+//     }
+
+//     return res.status(200).json(new ApiResponse(200, {
+//         blogs,
+//         currentPage: page,
+//         totalPages: Math.ceil(totalBlogs / limit),
+//         totalBlogs
+//     }, "Blogs fetched successfully"));
+// });
+
 const getAllBlogs = asyncHandler(async (req, res) => {
     const sortBy = req.query.sortBy || 'createdAt'; // Default to sorting by 'createdAt'
     const order = req.query.order === 'desc' ? -1 : 1; // Default to ascending order
@@ -44,17 +74,42 @@ const getAllBlogs = asyncHandler(async (req, res) => {
     const limit = parseInt(req.query.limit) || 10; // Default to 10 blogs per page
     const skip = (page - 1) * limit; // Calculate the number of documents to skip
 
-    const blogs = await Blog.find()
+    const { category, startDate, endDate } = req.query;
+
+    // Create a filter object
+    const filter = {};
+
+    // Add category filter if provided
+    if (category) {
+        filter.category = category;
+    }
+    console.log(startDate, endDate);
+    
+
+    // Add date range filter if provided
+    if (startDate && endDate) {
+        filter.createdAt = {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate),
+        };
+    } else if (startDate) {
+        filter.createdAt = { $gte: new Date(startDate) };
+    } else if (endDate) {
+        filter.createdAt = { $lte: new Date(endDate) };
+    }
+    console.log(filter.createdAt);
+    
+
+    const blogs = await Blog.find(filter)
         .populate('owner', req.user._id)
         .sort({ [sortBy]: order })
         .skip(skip)
         .limit(limit);
 
-    const totalBlogs = await Blog.countDocuments(); // Get the total number of blogs
+    const totalBlogs = await Blog.countDocuments(filter); // Get the total number of filtered blogs
 
     if (!blogs.length) {
-        res.status(404).json(new ApiResponse(404, {}, "No blogs found"));
-        // throw new ApiError(404, "No blogs found");
+        return res.status(404).json(new ApiResponse(404, {}, "No blogs found"));
     }
 
     return res.status(200).json(new ApiResponse(200, {
