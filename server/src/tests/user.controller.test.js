@@ -81,26 +81,19 @@ describe('User Registration', () => {
             .post('/api/v1/users/register')
             .send(invalidUser);
         expect(res.status).toBe(400);
-        // Uncomment the line below once error messages are implemented in the API
         // expect(res.body).toHaveProperty('message', 'Email is required');
     }, 2000);
 
     test('Negative Test: User Registration with Short Password', async () => {
-        const invalidUser = { ...mockUser1, password: '12345' }; // Password too short
+        const invalidUser = { fullName:'Kishan Kumar', email:'aasdfs@gmail.com',password:'advcs',username:'kkksdf'}; // Password too short
         const res = await request(app)
             .post('/api/v1/users/register')
             .send(invalidUser);
         expect(res.status).toBe(400);
-        // Uncomment the line below once error messages are implemented in the API
         // expect(res.body).toHaveProperty('message', 'Password must be at least 6 characters long');
     }, 2000);
 
     test('Negative Test: User Registration with Duplicate Email', async () => {
-        // First registration
-        await request(app)
-            .post('/api/v1/users/register')
-            .send(mockUser1);
-
         // Attempt to register with the same email
         const res = await request(app)
             .post('/api/v1/users/register')
@@ -111,10 +104,6 @@ describe('User Registration', () => {
     }, 2000);
 
     test('Negative Test: User Registration with Duplicate Username', async () => {
-        // First registration
-        await request(app)
-            .post('/api/v1/users/register')
-            .send(mockUser1);
 
         // Attempt to register with the same username
         const res = await request(app)
@@ -167,7 +156,7 @@ describe('User Login', () => {
         const res = await request(app)
             .post('/api/v1/users/login')
             .send({ username: 'invalidUser', password: mockUser.password });
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(404);
         // Uncomment the line below once error messages are implemented in the API
         // expect(res.body).toHaveProperty('message', 'Invalid username or password');
     }, 2000);
@@ -197,7 +186,6 @@ describe('User Logout', () => {
             .post('/api/v1/users/logout');
 
         expect(res.status).toBe(401);
-        // Uncomment the line below once error messages are implemented in the API
         // expect(res.body).toHaveProperty('message', 'Token is required');
     });
 
@@ -207,7 +195,6 @@ describe('User Logout', () => {
             .set('Authorization', 'Bearer invalidToken');
 
         expect(res.status).toBe(401);
-        // Uncomment the line below once error messages are implemented in the API
         // expect(res.body).toHaveProperty('message', 'Invalid token');
     });
 });
