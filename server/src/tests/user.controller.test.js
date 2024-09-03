@@ -198,7 +198,6 @@ describe('User Logout', () => {
             .post('/api/v1/users/logout');
 
         expect(res.status).toBe(401);
-        // expect(res.body).toHaveProperty('message', 'Token is required');
     });
 
     test('Negative Test: User Logout with Invalid Token', async () => {
@@ -207,6 +206,5 @@ describe('User Logout', () => {
             .set('Authorization', 'Bearer invalidToken');
 
         expect(res.status).toBe(401);
-        // expect(res.body).toHaveProperty('message', 'Invalid token');
     });
 });

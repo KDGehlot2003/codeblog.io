@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const ApiError = require('../utils/ApiError.js');
 const asyncHandler = require('../utils/asyncHandler.js');
 const User = require('../models/user.model.js');
+const { json } = require('express');
 
 
 const verifyJWT = asyncHandler(async (req, _, next) => {   
@@ -16,7 +17,7 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
 
     const user = await User.findById(decodedToken?._id)
     .select("-password -refreshToken")
-
+    
     if (!user) {
         throw new ApiError(401, "Invalid Access Token")
     }
@@ -24,7 +25,10 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
     req.user = user;
     next()
 } catch (error) {
-    throw new ApiError(401, error?.message || "Invalid Access Token")
+    // throw new ApiError(401, error?.message || "Invalid Access Token")
+    // console.log({error: error.message});
+    throw new ApiError(401, json(error))
+    
 }
 });
 

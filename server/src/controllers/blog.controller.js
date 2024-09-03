@@ -83,7 +83,7 @@ const getAllBlogs = asyncHandler(async (req, res) => {
     if (category) {
         filter.category = category;
     }
-    console.log(startDate, endDate);
+    // console.log(startDate, endDate);
     
 
     // Add date range filter if provided
@@ -97,7 +97,7 @@ const getAllBlogs = asyncHandler(async (req, res) => {
     } else if (endDate) {
         filter.createdAt = { $lte: new Date(endDate) };
     }
-    console.log(filter.createdAt);
+    // console.log(filter.createdAt);
     
 
     const blogs = await Blog.find(filter)
@@ -145,13 +145,13 @@ const getBlogById = asyncHandler( async (req,res) => {
 const updateBlog = asyncHandler( async (req,res) => {
 
     const {blogId } = req.params;
-    const { title, content } = req.body;
+    const { title, content, category } = req.body;
 
-    if (!(title || content || req.files?.thumbnail)) {
+    if (!(title || content || category || req.files?.thumbnail)) {
         res.status(400).json(new ApiResponse(400, {}, "Please provide at least one field to update"));
         // throw new ApiError(400, "Please provide at least one field to update");
     }
-    console.log(blogId);
+    // console.log(blogId);
     
     
     const blog = await Blog.findById(blogId);
@@ -168,6 +168,7 @@ const updateBlog = asyncHandler( async (req,res) => {
 
     if (title) blog.title = title;
     if (content) blog.content = content;
+    if (category) blog.category = category;
 
     if (req.files?.thumbnail) {
         const thumbnailLocalPath = req.files.thumbnail[0].path;
