@@ -37,9 +37,6 @@ beforeAll(async () => {
     const res = await request(app)
         .post('/api/v1/users/register')
         .send(mockUser);
-    // console.log("\n\n\n\n\n\n\n",res.status);
-    
-        // setTimeout(() => {}, 1000);
    
 });
 
@@ -65,8 +62,7 @@ describe('Create Blog Post Endpoint ',  () => {
         const loginRes = await  request(app)
         .post('/api/v1/users/login')
         .send({ email: mockUser.email, password: mockUser.password });
-        // console.log("\n\n\n\n\n\n\n",loginRes.body);
-        // console.log("\n\n\n\n",loginRes.status);
+
         accessToken = loginRes.body.data.accessToken;
         refreshToken = loginRes.body.data.refreshToken;
         
@@ -81,6 +77,7 @@ describe('Create Blog Post Endpoint ',  () => {
         expect(res.body).toHaveProperty('data');
         expect(res.body.data).toHaveProperty('title', mockBlog.title);
         expect(res.body.data).toHaveProperty('content', mockBlog.content);
+        expect(res.body.data).toHaveProperty('category',mockBlog.category);
 
         const blog = await Blog.findOne({ title: mockBlog.title });
         expect(blog).not.toBeNull();
@@ -376,7 +373,7 @@ describe('Get Blog Endpoints', () => {
             expect(res.body.data.blogs).toHaveLength(5);
         })
 
-        test('Negative Test: Filter by endDate before startDate', async()=>{
+        test('Negative Test(Edge Case): Filter by endDate before startDate', async()=>{
             const res = await request(app)
             .get('/api/v1/blogs/?endDate=2021-10-01&startDate=2025-10-01')
             .set('Authorization', `Bearer ${accessToken}`);
@@ -393,6 +390,14 @@ describe('Get Blog Endpoints', () => {
         //     expect(res.body).toHaveProperty('message', 'No blogs found');
         // });
 
+        // test('Negative Test: Filter by invalid endDate', async()=>{
+        //     const res = await request(app)
+        //     .get('/api/v1/blogs/?endDate=invalidDate')
+        //     .set('Authorization', `Bearer ${accessToken}`);
+        //     expect(res.status).toBe(404);
+        //     expect(res.body).toHaveProperty('message', 'No blogs found');
+        // });
+
         test('Positve Test: Filter by Category',async()=>{
             const res= await request(app)
             .get('/api/v1/blogs/?category=DSA')
@@ -400,9 +405,12 @@ describe('Get Blog Endpoints', () => {
             expect(res.status).toBe(200);
             expect(res.body).toHaveProperty('data');
             expect(res.body.data.blogs).toHaveLength(3);
+            for(let i of res.body.data.blogs){
+                expect(i.category).toBe('DSA'); 
+            }
         })
 
-        test('Negative Test: Filter by invalid Category',async()=>{
+        test('Negative Test(Edge Case): Filter by invalid Category',async()=>{
             const res= await request(app)
             .get('/api/v1/blogs/?category=invalidCategory')
             .set('Authorization', `Bearer ${accessToken}`);
@@ -565,7 +573,6 @@ describe('Update Blog Endpoints', () => {
     });
     test('Negative Test: Unauthorized Access', async () => {
         const blog = await Blog.findOne({ title: mockBlog.title });
-        // console.log("blog: \n\n\n",blog);
         const res = await request(app)
             .patch(`/api/v1/blogs/${blog._id}`)
             .send({ content: 'Updated Content' });
@@ -636,7 +643,7 @@ describe('Delete Blog Endpoints', () => {
 });
 
 
-describe("Data Itegrity Test",()=>{
+describe("Data Integrity Test",()=>{
     mockBlogDI={
         title: 'Blog 6',
         content: 'Content 6',
