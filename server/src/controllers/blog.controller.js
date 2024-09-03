@@ -15,6 +15,19 @@ const createBlog = asyncHandler( async (req,res) => {
             // throw new ApiError(400, "Please provide title and content")
         }
 
+        
+        if (title.length < 3 || title.length > 30) {
+            res.status(400).json(new ApiResponse(400, {}, "Title should be between 3 to 30 characters"));
+            throw new ApiError(400, "Title should be between 3 to 30 characters");
+        }
+
+        if (category.length < 2 || category.length > 30) {
+            res.status(400).json(new ApiResponse(400, {}, "Category should be between 2 to 30 characters"));
+            throw new ApiError(400, "Category should be between 2 to 30 characters");
+        }
+
+        
+
         // const thumbnailLocalPath = req.files?.thumbnail[0]?.path
         
 
@@ -84,6 +97,14 @@ const getAllBlogs = asyncHandler(async (req, res) => {
         filter.category = category;
     }
     // console.log(startDate, endDate);
+
+    // Negative Test: Filter by invalid startDate and endDate
+    if (startDate && !Date.parse(startDate)) {
+        return res.status(400).json(new ApiResponse(400, {}, "Invalid start date"));
+    }
+    if (endDate && !Date.parse(endDate)) {
+        return res.status(400).json(new ApiResponse(400, {}, "Invalid end date"));
+    }
     
 
     // Add date range filter if provided
@@ -125,7 +146,7 @@ const getBlogById = asyncHandler( async (req,res) => {
     const {blogId} = req.params
 
     if (!isValidObjectId(blogId)) {
-        res.status(400).json(new ApiResponse(400, {}, "Invalid blog id"))
+        res.status(401).json(new ApiResponse(401, {}, "Invalid blog id"))
         // throw new ApiError(400, "Invalid blog id")
     }
 
@@ -153,6 +174,21 @@ const updateBlog = asyncHandler( async (req,res) => {
     }
     // console.log(blogId);
     
+    // invalid blog id
+    if (!isValidObjectId(blogId)) {
+        res.status(401).json(new ApiResponse(401, {}, "Invalid blog id"));
+        // throw new ApiError(400, "Invalid blog id");
+    }
+
+    if (title && (title.length < 3 || title.length > 30)) {
+        res.status(400).json(new ApiResponse(400, {}, "Title should be between 3 to 30 characters"));
+        throw new ApiError(400, "Title should be between 3 to 30 characters");
+    }
+
+    if (category && (category.length < 2 || category.length > 30)) {
+        res.status(400).json(new ApiResponse(400, {}, "Category should be between 2 to 30 characters"));
+        throw new ApiError(400, "Category should be between 2 to 30 characters");
+    }
     
     const blog = await Blog.findById(blogId);
 
@@ -186,6 +222,11 @@ const updateBlog = asyncHandler( async (req,res) => {
 const deleteBlog = asyncHandler( async (req,res) => {
     
     const { blogId } = req.params;  
+
+    if (!isValidObjectId(blogId)) {
+        res.status(401).json(new ApiResponse(401, {}, "Invalid blog id"));
+        // throw new ApiError(400, "Invalid blog id");
+    }
 
     const blog = await Blog.findById(blogId);
 
