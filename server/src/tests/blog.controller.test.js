@@ -65,6 +65,8 @@ describe('Create Blog Post Endpoints',  () => {
         const loginRes = await  request(app)
         .post('/api/v1/users/login')
         .send({ email: mockUser.email, password: mockUser.password });
+        // console.log("\n\n\n\n\n\n\n",loginRes.body);
+        // console.log("\n\n\n\n",loginRes.status);
         accessToken = loginRes.body.data.accessToken;
         refreshToken = loginRes.body.data.refreshToken;
         
@@ -301,45 +303,45 @@ describe('Update Blog Endpoints', () => {
         expect(res.body.data).toHaveProperty('category',mockBlog.category);
     }, 20000);
 
-    // test('Positve Test: Update Blog with two fields', async()=>{
-    //     let blog = await Blog.findOne({ title: mockBlog.title });
-    //     const res = await request(app)
-    //         .patch(`/api/v1/blogs/${blog._id}`)
-    //         .set('Authorization', `Bearer ${accessToken}`)
-    //         .send({ content: 'Updated Content', Category: 'Updated Category'});
-    //     expect(res.status).toBe(200);
-    //     expect(res.body).toHaveProperty('message', 'Blog updated successfully');
-    //     expect(res.body).toHaveProperty('data');
-    //     expect(res.body.data).toHaveProperty('title', mockBlog.title);
-    //     expect(res.body.data).toHaveProperty('content', 'Updated Content');
-    //     expect(res.body.data).toHaveProperty('category','Updated Category');
+    test('Positve Test: Update Blog with two fields', async()=>{
+        let blog = await Blog.findOne({ title: mockBlog.title });
+        const res = await request(app)
+            .patch(`/api/v1/blogs/${blog._id}`)
+            .set('Authorization', `Bearer ${accessToken}`)
+            .send({ content: 'Updated Content', category: 'Updated Category'});
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('message', 'Blog updated successfully');
+        expect(res.body).toHaveProperty('data');
+        expect(res.body.data).toHaveProperty('title', mockBlog.title);
+        expect(res.body.data).toHaveProperty('content', 'Updated Content');
+        expect(res.body.data).toHaveProperty('category','Updated Category');
 
-    //     blog= await Blog.findOne({title:mockBlog.title});
-    //     expect(blog).not.toBeNull();
-    //     expect(blog.title).toBe(mockBlog.title);
-    //     expect(blog.content).toBe('Updated Content');
-    //     expect(blog.category).toBe('Updated Category');
-    // },20000);
+        blog= await Blog.findOne({title:mockBlog.title});
+        expect(blog).not.toBeNull();
+        expect(blog.title).toBe(mockBlog.title);
+        expect(blog.content).toBe('Updated Content');
+        expect(blog.category).toBe('Updated Category');
+    },20000);
 
-    // test('Negative Test: Unauthorized Access', async () => {
-    //     const blog = await Blog.findOne({ title: mockBlog.title });
-    //     console.log("blog: \n\n\n",blog);
-    //     const res = await request(app)
-    //         .patch(`/api/v1/blogs/${blog._id}`)
-    //         .send({ content: 'Updated Content' });
+    test('Negative Test: Unauthorized Access', async () => {
+        const blog = await Blog.findOne({ title: mockBlog.title });
+        // console.log("blog: \n\n\n",blog);
+        const res = await request(app)
+            .patch(`/api/v1/blogs/${blog._id}`)
+            .send({ content: 'Updated Content' });
 
-    //     expect(res.status).toBe(401);
-    //     expect(res.body).toHaveProperty('message', 'Authorization token is required');
+        expect(res.status).toBe(401);
+        expect(res.error).toHaveProperty('message', `cannot PATCH /api/v1/blogs/${blog._id} (401)`);
 
-    //     // Invalid token scenario
-    //     const res2 = await request(app)
-    //         .patch(`/api/v1/blogs/${blog._id}`)
-    //         .set('Authorization', 'Bearer invalidToken')
-    //         .send({ content: 'Updated Content' });
+        // Invalid token scenario
+        const res2 = await request(app)
+            .patch(`/api/v1/blogs/${blog._id}`)
+            .set('Authorization', 'Bearer invalidToken')
+            .send({ content: 'Updated Content' });
 
-    //     expect(res2.status).toBe(401);
-    //     // expect(res2.body).toHaveProperty('message', 'Invalid or expired token');
-    // }, 20000);
+        expect(res2.status).toBe(401);
+        expect(res2.error).toHaveProperty('message', `cannot PATCH /api/v1/blogs/${blog._id} (401)`);
+    }, 20000);
 
     
 });
@@ -435,5 +437,4 @@ describe("Data Itegrity Test",()=>{
     });
 
 });
-
 
