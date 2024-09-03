@@ -94,7 +94,7 @@ describe('Create Blog Post Endpoint ',  () => {
                 .field('content', mockBlog.content);
       
             expect(res.status).toBe(400);
-            // TODO expect(res.body).toHaveProperty('message', 'Title is required');
+            expect(res.body).toHaveProperty('message', 'Please provide title, content and category');
       
             // Test case where content is missing
             const res2 = await request(app)
@@ -103,7 +103,7 @@ describe('Create Blog Post Endpoint ',  () => {
                 .field('title', mockBlog.title);
       
             expect(res2.status).toBe(400);
-            // TODO expect(res2.body).toHaveProperty('message', 'Content is required');
+            expect(res2.body).toHaveProperty('message', 'Please provide title, content and category');
       
             // Test case where both title and content are missing
             const res3 = await request(app)
@@ -113,7 +113,7 @@ describe('Create Blog Post Endpoint ',  () => {
                 .field('content', '');
       
             expect(res3.status).toBe(400);
-            // TODO expect(res3.body).toHaveProperty('message', 'Title and Content are required');
+            expect(res3.body).toHaveProperty('message', 'Please provide title, content and category');
     }, 20000);
 
     test('Negative Test(Edge Case): Empty Strings', async () => {
@@ -128,46 +128,45 @@ describe('Create Blog Post Endpoint ',  () => {
         expect(res.body).toHaveProperty('message', 'Please provide title, content and category');
     });
 
-    // TODO
-    // test('Negative Test(Edge Case): Too Large title', async () => {
-    //     const res = await request(app)
-    //         .post('/api/v1/blogs/')
-    //         .set('Authorization', `Bearer ${accessToken}`)
-    //         .field('title', 'a'.repeat(101))
-    //         .field('content', mockBlog.content)
-    //         .field('category',mockBlog.category);
+    test('Negative Test(Edge Case): Too Large title', async () => {
+        const res = await request(app)
+            .post('/api/v1/blogs/')
+            .set('Authorization', `Bearer ${accessToken}`)
+            .field('title', 'a'.repeat(101))
+            .field('content', mockBlog.content)
+            .field('category',mockBlog.category);
     
-    //     expect(res.status).toBe(400);
-    //     expect(res.body).toHaveProperty('message', 'Title is too long');
+        expect(res.status).toBe(400);
+        expect(res.body).toHaveProperty('message', 'Title should be between 3 to 30 characters');
 
-    //     const blog = await Blog.findOne({ title: 'a'.repeat(101) });
-    //     expect(blog).toBeNull();
-    // });
+        const blog = await Blog.findOne({ title: 'a'.repeat(101) });
+        expect(blog).toBeNull();
+    });
 
-    // TODO
-    // test('Negative Test(Edge Case): Too Large category', async () => {
-    //     const res = await request(app)
-    //         .post('/api/v1/blogs/')
-    //         .set('Authorization', `Bearer ${accessToken}`)
-    //         .field('title', mockBlog.title)
-    //         .field('content', mockBlog.content)
-    //         .field('category','a'.repeat(101));
+    test('Negative Test(Edge Case): Too Large category', async () => {
+        const res = await request(app)
+            .post('/api/v1/blogs/')
+            .set('Authorization', `Bearer ${accessToken}`)
+            .field('title', mockBlog.title)
+            .field('content', mockBlog.content)
+            .field('category','a'.repeat(101));
     
-    //     expect(res.status).toBe(400);
-    //     expect(res.body).toHaveProperty('message', 'Category is too long');
+        expect(res.status).toBe(400);
+        expect(res.body).toHaveProperty('message', 'Category should be between 2 to 30 characters');
 
-    //     const blog = await Blog.findOne({ category: 'a'.repeat(101) });
-    //     expect(blog).toBeNull();
-    // });
-      
+        const blog = await Blog.findOne({ category: 'a'.repeat(101) });
+        expect(blog).toBeNull();
+    });
+
     test('Negative Test: Unauthorized Access', async () => {
         const res = await request(app)
             .post('/api/v1/blogs/')
             .field('title', mockBlog.title)
-            .field('content', mockBlog.content);
+            .field('content', mockBlog.content)
+            .field('category',mockBlog.category);
     
         expect(res.status).toBe(401);
-        // TODO expect(res.body).toHaveProperty('message', 'Authorization token is required');
+        // TODO expect(res.body).toHaveProperty('message', 'Unauthorized request');
     
         // Invalid token scenario
         const res2 = await request(app)
@@ -233,9 +232,10 @@ describe('Get Blog Endpoints', () => {
         test('Negative Test: invalid blog ID', async () => {
             const res = await request(app)
                 .get('/api/v1/blogs/invalidId')
+                .set('Authorization', `Bearer ${accessToken}`)
                 .send();
             expect(res.status).toBe(401);
-            // TODO expect(res.body).toHaveProperty('message', 'Invalid Blog ID');
+            expect(res.body).toHaveProperty('message', 'Invalid blog id');
         
             try {
                 const blog = await Blog.findOne({ _id: 'invalidId' });
@@ -381,22 +381,21 @@ describe('Get Blog Endpoints', () => {
             expect(res.body).toHaveProperty('message', 'No blogs found');
         });
 
-        // TODO
-        // test('Negative Test: Filter by invalid startDate', async()=>{
-        //     const res = await request(app)
-        //     .get('/api/v1/blogs/?startDate=invalidDate')
-        //     .set('Authorization', `Bearer ${accessToken}`);
-        //     expect(res.status).toBe(404);
-        //     expect(res.body).toHaveProperty('message', 'No blogs found');
-        // });
+        test('Negative Test: Filter by invalid startDate', async()=>{
+            const res = await request(app)
+            .get('/api/v1/blogs/?startDate=invalidDate')
+            .set('Authorization', `Bearer ${accessToken}`);
+            expect(res.status).toBe(400);
+            expect(res.body).toHaveProperty('message', 'Invalid start date');
+        });
 
-        // test('Negative Test: Filter by invalid endDate', async()=>{
-        //     const res = await request(app)
-        //     .get('/api/v1/blogs/?endDate=invalidDate')
-        //     .set('Authorization', `Bearer ${accessToken}`);
-        //     expect(res.status).toBe(404);
-        //     expect(res.body).toHaveProperty('message', 'No blogs found');
-        // });
+        test('Negative Test: Filter by invalid endDate', async()=>{
+            const res = await request(app)
+            .get('/api/v1/blogs/?endDate=invalidDate')
+            .set('Authorization', `Bearer ${accessToken}`);
+            expect(res.status).toBe(400);
+            expect(res.body).toHaveProperty('message', 'Invalid end date');
+        });
 
         test('Positve Test: Filter by Category',async()=>{
             const res= await request(app)
@@ -481,17 +480,16 @@ describe('Update Blog Endpoints', () => {
         expect(blog.category).toBe('Updated Category');
     },20000);
 
-    // TODO
-    // test('Negative Test: Invalid Blog ID', async () => {
-    //     const res = await request(app)
-    //         .patch('/api/v1/blogs/invalidId')
-    //         .set('Authorization', `Bearer ${accessToken}`)
-    //         .send({ content: 'Updated Content' });
+    test('Negative Test: Invalid Blog ID', async () => {
+        const res = await request(app)
+            .patch('/api/v1/blogs/invalidId')
+            .set('Authorization', `Bearer ${accessToken}`)
+            .send({ content: 'Updated Content' });
 
-    //     expect(res.status).toBe(401);
-    //     // TODO expect(res.body).toHaveProperty('message', 'Invalid Blog ID');
+        expect(res.status).toBe(401);
+        expect(res.body).toHaveProperty('message', 'Invalid blog id');
 
-    // });
+    });
 
     test('Negative Test(Edge Case): Empty Strings', async () => {
         const blog = await Blog.findOne({ title: mockBlog.title });
@@ -501,7 +499,7 @@ describe('Update Blog Endpoints', () => {
             .send({ content: '', category: '' });
 
         expect(res.status).toBe(400);
-        // TODO expect(res.body).toHaveProperty('message', 'Please provide content and category');
+        expect(res.body).toHaveProperty('message', 'Please provide at least one field to update');
 
         const blog2= await Blog.findOne({title:mockBlog.title});
         expect(blog2).not.toBeNull();
@@ -517,7 +515,7 @@ describe('Update Blog Endpoints', () => {
             .set('Authorization', `Bearer ${accessToken}`)
             .send({});
         expect(res.status).toBe(400);
-        // TODO expect(res.body).toHaveProperty('message', 'Please provide title,content and category');
+        expect(res.body).toHaveProperty('message', 'Please provide at least one field to update');
 
         const blog2= await Blog.findOne({title:mockBlog.title});
         expect(blog2).not.toBeNull();
@@ -526,35 +524,33 @@ describe('Update Blog Endpoints', () => {
         expect(blog2.category).toBe(blog.category);
     });
 
-    // TODO
-    // test('Negative Test(Edge Case): Too Large title', async () => {
-    //     const blog = await Blog.findOne({ title: mockBlog.title });
-    //     const res = await request(app)
-    //         .patch(`/api/v1/blogs/${blog._id}`)
-    //         .set('Authorization', `Bearer ${accessToken}`)
-    //         .send({ title: 'a'.repeat(101) });
-    //     expect(res.status).toBe(400);
-    //     // TODO expect(res.body).toHaveProperty('message', 'Title is too long');
-    //     const blog2 = await Blog.findOne({ title: 'a'.repeat(101) });
-    //     expect(blog2).toBeNull();
-    // });
+    test('Negative Test(Edge Case): Too Large title', async () => {
+        const blog = await Blog.findOne({ title: mockBlog.title });
+        const res = await request(app)
+            .patch(`/api/v1/blogs/${blog._id}`)
+            .set('Authorization', `Bearer ${accessToken}`)
+            .send({ title: 'a'.repeat(101) });
+        expect(res.status).toBe(400);
+        expect(res.body).toHaveProperty('message', 'Title should be between 3 to 30 characters');
+        const blog2 = await Blog.findOne({ title: 'a'.repeat(101) });
+        expect(blog2).toBeNull();
+    });
 
-    //TODO
-    // test('Negative Test(Edge Case): Too Large Category', async () => {
-    //     const blog = await Blog.findOne({ title: mockBlog.title });
-    //     const res = await request(app)
-    //         .patch(`/api/v1/blogs/${blog._id}`)
-    //         .set('Authorization', `Bearer ${accessToken}`)
-    //         .send({ category: 'a'.repeat(101) });
-    //     expect(res.status).toBe(400);
-    //     // TODO expect(res.body).toHaveProperty('message', 'Title is too long');
-    //     const blog2 = await Blog.findOne({ title: mockBlog.title });
-    //     expect(blog2).not.toBeNull();
-    //     expect(blog2.title).toBe(blog.title);
-    //     expect(blog2.content).toBe(blog.content);
-    //     expect(blog2.category).toBe(blog.category);
+    test('Negative Test(Edge Case): Too Large Category', async () => {
+        const blog = await Blog.findOne({ title: mockBlog.title });
+        const res = await request(app)
+            .patch(`/api/v1/blogs/${blog._id}`)
+            .set('Authorization', `Bearer ${accessToken}`)
+            .send({ category: 'a'.repeat(101) });
+        expect(res.status).toBe(400);
+        expect(res.body).toHaveProperty('message', 'Category should be between 2 to 30 characters');
+        const blog2 = await Blog.findOne({ title: mockBlog.title });
+        expect(blog2).not.toBeNull();
+        expect(blog2.title).toBe(blog.title);
+        expect(blog2.content).toBe(blog.content);
+        expect(blog2.category).toBe(blog.category);
 
-    // });
+    });
 
     test('Negative Test(Edge Case): Null Fields', async () => {
         const blog = await Blog.findOne({ title: mockBlog.title });
@@ -606,15 +602,15 @@ describe('Update Blog Endpoints', () => {
 describe('Delete Blog Endpoints', () => {
     
 
-    // TODO
-    // test('Negative Test: Invalid Blog ID', async () => {
-    //     const res = await request(app)
-    //         .delete('/api/v1/blogs/invalidId')
-    //         .set('Authorization', `Bearer ${accessToken}`);
 
-    //     expect(res.status).toBe(401);
-    //     // TODO expect(res.body).toHaveProperty('message', 'Invalid Blog ID');
-    // });
+    test('Negative Test: Invalid Blog ID', async () => {
+        const res = await request(app)
+            .delete('/api/v1/blogs/invalidId')
+            .set('Authorization', `Bearer ${accessToken}`);
+
+        expect(res.status).toBe(401);
+        expect(res.body).toHaveProperty('message', 'Invalid blog id');
+    });
 
     test('Negative Test: Unauthorized Access', async () => {
         const blog = await Blog.findOne({ title: mockBlog.title });
