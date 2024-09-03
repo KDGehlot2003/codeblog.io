@@ -43,6 +43,7 @@ afterAll(async () => {
     if (server) {
         await new Promise((resolve) => server.close(resolve));
     }
+    await mongoose.connection.close();
     if (mongoServer) {
         await mongoServer.stop();
     }
