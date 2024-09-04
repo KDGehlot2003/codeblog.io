@@ -2,7 +2,7 @@ const request = require('supertest');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 const { app } = require('../app');
-const connectDB = require('../db/index');
+const mockConnectDB = require('../db/index');
 const Blog = require('../models/blog.model');
 const User = require('../models/user.model');
 
@@ -27,7 +27,7 @@ const mockBlog = {
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-    await connectDB(mongoUri);
+    await mockConnectDB(mongoUri);
 
     server = app.listen(8001, () => {
         console.log('Server started on port 8002');
